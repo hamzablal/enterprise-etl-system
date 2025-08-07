@@ -1,0 +1,37 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Enterprise ETL Pipeline Dashboard",
+    "tags": ["etl", "monitoring"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Pipeline Success Rate",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "rate(pipeline_success_total[5m])",
+            "legendFormat": "Success Rate"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Data Processing Volume", 
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "records_processed_total",
+            "legendFormat": "Records Processed"
+          }
+        ]
+      }
+    ],
+    "time": {
+      "from": "now-24h",
+      "to": "now"
+    },
+    "refresh": "30s"
+  }
+}

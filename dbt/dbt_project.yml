@@ -1,0 +1,25 @@
+name: 'enterprise_ecommerce_elt'
+version: '1.0.0'
+config-version: 2
+
+profile: 'enterprise_ecommerce_elt'
+
+model-paths: ["models"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+target-path: "target"
+clean-targets: ["target", "dbt_packages"]
+
+models:
+  enterprise_ecommerce_elt:
+    staging:
+      +materialized: view
+      +schema: staging
+    analytics:
+      +materialized: table
+      +schema: analytics
+
+# Cloud warehouse specific configurations
+vars:
+  batch_size: 10000
+  max_partitions: 100

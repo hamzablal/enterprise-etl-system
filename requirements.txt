@@ -1,0 +1,13 @@
+# Core ETL Framework
+apache-airflow==2.8.1
+apache-airflow-providers-postgres==5.7.1
+dbt-postgres==1.7.18
+
+# Data Processing
+pandas==2.0.3
+psycopg2-binary==2.9.7
+sqlalchemy==1.4.49
+
+# Monitoring & Logging
+prometheus-client==0.19.0
+grafana-api==1.0.3

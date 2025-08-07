@@ -1,0 +1,24 @@
+version: 2
+
+sources:
+  - name: raw_data
+    description: "Raw data loaded into cloud warehouse"
+    schema: raw
+    tables:
+      - name: ecommerce_transactions
+        description: "Raw e-commerce transaction data"
+        columns:
+          - name: invoice_no
+            description: "Invoice number"
+            tests:
+              - not_null
+          - name: stock_code  
+            description: "Product stock code"
+          - name: quantity
+            description: "Quantity purchased"
+          - name: unit_price
+            description: "Unit price"
+          - name: customer_id
+            description: "Customer identifier"
+          - name: load_timestamp
+            description: "When data was loaded to cloud warehouse"
