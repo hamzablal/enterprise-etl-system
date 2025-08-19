@@ -49,3 +49,4 @@ def check_pipeline_health():
 
 if __name__ == "__main__":
     check_pipeline_health()
+    
