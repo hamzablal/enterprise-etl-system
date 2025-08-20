@@ -1,4 +1,3 @@
-
 services:
   # Main PostgreSQL database for data
   postgres:
@@ -36,7 +35,7 @@ services:
 
   # Initialize Airflow database (runs once)
   airflow-init:
-    image: apache/airflow:2.8.1-python3.9
+    build: .
     environment:
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-db:5432/airflow
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
@@ -50,14 +49,13 @@ services:
         condition: service_healthy
     command: >
       bash -c "
-        pip install --user pandas psycopg2-binary &&
         airflow db init &&
         airflow users create --username admin --firstname Admin --lastname User --role Admin --email admin@example.com --password admin
       "
 
   # Airflow webserver
   airflow-webserver:
-    image: apache/airflow:2.8.1-python3.9
+    build: .
     container_name: airflow_webserver
     environment:
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-db:5432/airflow
@@ -72,15 +70,11 @@ services:
     depends_on:
       airflow-init:
         condition: service_completed_successfully
-    command: >
-      bash -c "
-        pip install --user pandas psycopg2-binary &&
-        airflow webserver --port 8080
-      "
+    command: airflow webserver --port 8080
 
   # Airflow scheduler
   airflow-scheduler:
-    image: apache/airflow:2.8.1-python3.9
+    build: .
     container_name: airflow_scheduler
     environment:
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-db:5432/airflow
@@ -92,11 +86,7 @@ services:
     depends_on:
       airflow-init:
         condition: service_completed_successfully
-    command: >
-      bash -c "
-        pip install --user pandas psycopg2-binary &&
-        airflow scheduler
-      "
+    command: airflow scheduler
 
 volumes:
   postgres_data:

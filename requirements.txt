@@ -1,6 +1,6 @@
 # Core ETL Framework
-apache-airflow==2.8.1
 apache-airflow-providers-postgres==5.7.1
+dbt-core==1.7.18
 dbt-postgres==1.7.18
 
 # Data Processing
