@@ -4,6 +4,7 @@ from airflow.operators.python_operator import PythonOperator
 from airflow.operators.bash_operator import BashOperator
 import pandas as pd
 from sqlalchemy import create_engine
+from monitoring import increment_pipeline_run, increment_pipeline_success, increment_records_processed
 
 default_args = {
     'owner': 'admin',
@@ -22,6 +23,8 @@ dag = DAG(
 
 def extract_and_load():
     """ELT Step 1&2: Extract and Load raw data"""
+    increment_pipeline_run()  # Start monitoring
+    
     print("🔄 ELT Phase: Extract and Load")
     
     # Read CSV with correct encoding
@@ -47,6 +50,10 @@ def extract_and_load():
     # Load raw data to database
     engine = create_engine('postgresql://admin:password123@postgres:5432/ecommerce')
     df.to_sql('ecommerce_data', engine, if_exists='replace', index=False)
+    
+    # Update monitoring metrics
+    increment_records_processed(len(df))
+    increment_pipeline_success()
     
     print(f"✅ Loaded {len(df)} clean records to database")
 

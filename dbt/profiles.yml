@@ -13,9 +13,3 @@ enterprise_ecommerce_elt:
       keepalives_idle: 0
       search_path: [public, raw, staging, analytics]
       
-    # Alternative cloud providers (for documentation)
-    # snowflake_cloud:
-    #   type: snowflake  
-    #   account: your_account
-    #   warehouse: compute_wh
-    #   database: ecommerce
