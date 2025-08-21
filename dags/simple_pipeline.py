@@ -4,7 +4,8 @@ from airflow.operators.python_operator import PythonOperator
 from airflow.operators.bash_operator import BashOperator
 import pandas as pd
 from sqlalchemy import create_engine
-from monitoring import increment_pipeline_run, increment_pipeline_success, increment_records_processed
+import time
+from monitoring import log_pipeline_start, log_pipeline_success, log_pipeline_failure
 
 default_args = {
     'owner': 'admin',
@@ -23,39 +24,47 @@ dag = DAG(
 
 def extract_and_load():
     """ELT Step 1&2: Extract and Load raw data"""
-    increment_pipeline_run()  # Start monitoring
+    start_time = time.time()
+    log_pipeline_start()  # Log start to PostgreSQL
     
-    print("🔄 ELT Phase: Extract and Load")
-    
-    # Read CSV with correct encoding
-    df = pd.read_csv('/opt/airflow/data/ecommerce_data.csv', encoding='latin-1')
-    print(f"✅ Extracted {len(df)} records from CSV")
-    
-    # Clean column names
-    df.columns = df.columns.str.lower().str.replace(' ', '_')
-    
-    # Data Quality: Drop rows with missing critical data
-    critical_columns = ['invoiceno', 'stockcode', 'unitprice', 'quantity']
-    initial_count = len(df)
-    df = df.dropna(subset=critical_columns)
-    print(f"🧹 Dropped {initial_count - len(df)} rows with missing critical data")
-    
-    # Data Quality: Remove duplicates
-    initial_count = len(df)
-    df = df.drop_duplicates()
-    print(f"🧹 Removed {initial_count - len(df)} duplicate rows")
-    
-    print(f"📊 Final clean dataset: {len(df)} records")
-    
-    # Load raw data to database
-    engine = create_engine('postgresql://admin:password123@postgres:5432/ecommerce')
-    df.to_sql('ecommerce_data', engine, if_exists='replace', index=False)
-    
-    # Update monitoring metrics
-    increment_records_processed(len(df))
-    increment_pipeline_success()
-    
-    print(f"✅ Loaded {len(df)} clean records to database")
+    try:
+        print("🔄 ELT Phase: Extract and Load")
+        
+        # Read CSV with correct encoding
+        df = pd.read_csv('/opt/airflow/data/ecommerce_data.csv', encoding='latin-1')
+        print(f"✅ Extracted {len(df)} records from CSV")
+        
+        # Clean column names
+        df.columns = df.columns.str.lower().str.replace(' ', '_')
+        
+        # Data Quality: Drop rows with missing critical data
+        critical_columns = ['invoiceno', 'stockcode', 'unitprice', 'quantity']
+        initial_count = len(df)
+        df = df.dropna(subset=critical_columns)
+        print(f"🧹 Dropped {initial_count - len(df)} rows with missing critical data")
+        
+        # Data Quality: Remove duplicates
+        initial_count = len(df)
+        df = df.drop_duplicates()
+        print(f"🧹 Removed {initial_count - len(df)} duplicate rows")
+        
+        print(f"📊 Final clean dataset: {len(df)} records")
+        
+        # Load raw data to database
+        engine = create_engine('postgresql://admin:password123@postgres:5432/ecommerce')
+        df.to_sql('ecommerce_data', engine, if_exists='replace', index=False)
+        
+        # Calculate duration and log success
+        duration = time.time() - start_time
+        log_pipeline_success(len(df), duration)
+        
+        print(f"✅ Loaded {len(df)} clean records to database")
+        print(f"📊 Pipeline completed in {duration:.2f} seconds")
+        
+    except Exception as e:
+        log_pipeline_failure(str(e))  # Log failure to PostgreSQL
+        print(f"❌ Pipeline failed: {e}")
+        raise
 
 # Define tasks
 extract_load = PythonOperator(
