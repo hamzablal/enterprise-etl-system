@@ -43,6 +43,11 @@ def extract_and_load():
         df = df.dropna(subset=critical_columns)
         print(f"🧹 Dropped {initial_count - len(df)} rows with missing critical data")
         
+        # Data Quality: Drop rows with missing data in any column
+        initial_count = len(df)
+        df = df.dropna(how='any')
+        print(f"🧹 Dropped {initial_count - len(df)} rows with missing values in any column")
+
         # Data Quality: Remove duplicates
         initial_count = len(df)
         df = df.drop_duplicates()
